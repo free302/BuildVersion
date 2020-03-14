@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <UsingTask TaskName="GetCurrentBuildVersion" AssemblyFile="..\BuildVersion.dll" />
+  <Target Name="BeforeBuildActionsProject1" BeforeTargets="BeforeBuild">
+    <GetCurrentBuildVersion BaseVersion="$(FileVersion)">
+      <Output TaskParameter="Version" PropertyName="FileVersion" />
+    </GetCurrentBuildVersion>
+    <PropertyGroup>
+      <AssemblyVersion>$(FileVersion)</AssemblyVersion>
+    </PropertyGroup>
+  </Target>
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>8.0</LangVersion>
+    <WarningsAsErrors>CS8600;CS8602;CS8603;CS8625;CS8604</WarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="16.0.461" />
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy /y $(TargetPath) $(ProjectDir)..\..\Publish\" />
+  </Target>
+
+</Project>
