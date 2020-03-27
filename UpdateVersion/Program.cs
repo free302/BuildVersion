@@ -3,24 +3,27 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using BuildVersion;
+using System.Runtime.CompilerServices;
+using System.Diagnostics;
 
-namespace UpdateVersion
+[assembly: InternalsVisibleTo("Tester")]
+
+namespace Universe.BuildVersion
 {
-    class Program
+    internal enum VersionType { Assembly, Setup };
+    internal class Program
     {
-        enum VersionType { Assembly, Setup };
-
-        static string _filePath;
         static string _dir;
-        static string inputString;
+        static string _filePath;
+        const string _FileName = "AssemblyInfo.cs";
+        static string _inputString;
         const string uninstallFileName = "uninstall.bat";
 
-        static VersionType whichVersion;
-        static Version oldVersion;
+        static VersionType _whichVersion;
+        static Version _oldVersion;
         static Version _newVersion;
 
-        static string productGuid;
+        static string _productGuid;
 
         static Regex[] regEx =
         {
@@ -32,7 +35,7 @@ namespace UpdateVersion
             new Regex("(\"ProductVersion\" = \"8:)(?<version>\\d+(\\.\\d+)+)\"")
             //"(""ProductVersion"" = ""8:)(\d+(\.\d+)+)"""
         };
-        static string[] strReplace =
+        static string[] _strReplace =
         {
             "AssemblyVersion(\"{0}\")",
             "AssemblyFileVersion(\"{0}\")",
@@ -40,7 +43,7 @@ namespace UpdateVersion
         };
 
 
-        static void Main(string[] args)
+        internal static void Main(string[] args)
         {
             try
             {
@@ -51,80 +54,84 @@ namespace UpdateVersion
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine(ex.Message);
-                Console.Error.WriteLine(ex.StackTrace);
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
             }
         }
-
-        static void parseArgs(string[] args)
+        static void printUsage()
         {
-            if (args.Length < 1) whichVersion = VersionType.Assembly;
+            var sb = new StringBuilder();
+            sb.AppendLine($"UpdateVersion {typeof(Program).Assembly.GetName().Version}");
+            sb.AppendLine("Usage: UpdateVersion {A|S} FilePath");
+            sb.AppendLine(" A : Assembly version");
+            sb.AppendLine(" S : Setup project version");
+            sb.AppendLine(" FilePath : AssemblyInfo.cs or xxx.csproj");
+            Console.WriteLine(sb.ToString());
+            Debug.WriteLine(sb.ToString());
+        }
+        internal static (VersionType type, string dir, string path) parseArgs(string[] args)
+        {
+            try
+            {
+                _dir = Path.GetDirectoryName(typeof(Program).Assembly.Location) ?? Environment.CurrentDirectory;
+                _filePath = Path.Combine(_dir, _FileName);
+
+                if (args.Length < 2) throw new ArgumentException("Insufficient arguments");
+
+                parseType(args[0]);
+                parseFile(args[1]);
+            }
+            catch(ArgumentException)
+            {
+                printUsage();
+                throw;
+            }
+            finally
+            {
+                var msg = $"[UpdateVersionFx] _dir={_dir}\n[UpdateVersionFx] _filePath={_filePath}";
+                Console.WriteLine(msg);
+                Debug.WriteLine(msg);
+            }
+            return (_whichVersion, _dir, _filePath);
+        }
+
+        private static void parseType(string typeArg)
+        {
+            _whichVersion = char.ToUpper(typeArg[0]) switch
+            {
+                'A' => VersionType.Assembly,
+                'S' => VersionType.Setup,
+                _ => VersionType.Assembly
+            };
+        }
+
+        private static void parseFile(string fileArg)
+        {
+            if (Path.IsPathRooted(fileArg)) _dir = Path.GetDirectoryName(fileArg) ?? _dir;
             else
             {
-                whichVersion = args[0].ToUpper()[0] switch
-                {
-                    'A' => VersionType.Assembly,
-                    'S' => VersionType.Setup,
-                    _ => VersionType.Assembly
-                };
+                var dir = Path.GetDirectoryName(fileArg);
+                if (!string.IsNullOrWhiteSpace(dir)) _dir = Path.Combine(_dir, dir);
             }
-
-            _dir = Path.GetDirectoryName(typeof(Program).Assembly.Location) ?? Environment.CurrentDirectory;
-            _filePath = Path.Combine(_dir, "AssemblyInfo.cs");
-            if (args.Length < 2) return;
-
-            _filePath = args[1];
-            if (Path.IsPathRooted(_filePath)) _dir = Path.GetDirectoryName(_filePath) ?? _dir;
-            else
-            {
-                var dir = Path.GetDirectoryName(_filePath);
-                if (!string.IsNullOrWhiteSpace(dir))
-                {
-                    _dir = Path.Combine(_dir, dir);
-                    _filePath = Path.Combine(_dir, _filePath);
-                }
-            }
+            var fn = Path.GetFileName(fileArg);
+            _filePath = Path.Combine(_dir, string.IsNullOrWhiteSpace(fn) ? _FileName : fn);
         }
 
-        static void calcCurrentVersion()
+        internal static void calcCurrentVersion()
         {
-            inputString = File.ReadAllText(_filePath);
+            _inputString = File.ReadAllText(_filePath);
 
-            Regex reg = regEx[(int)whichVersion];
-            Match match = reg.Match(inputString);
+            Regex reg = regEx[(int)_whichVersion];
+            Match match = reg.Match(_inputString);
 
-            oldVersion = new Version(match.Groups["version"].ToString());
+            _oldVersion = new Version(match.Groups["version"].ToString());
         }
 
-        static void calcNewVersion()
+        internal static void calcNewVersion() => _newVersion = _whichVersion switch
         {
-            
-            switch (whichVersion)
-            {
-                case VersionType.Assembly:
-                    _newVersion = GetCurrentBuildVersion.GetCurrentBuildVersionString(oldVersion);
-                    break;
-                case VersionType.Setup:
-                    var major = DateTime.Now.Year % 100;
-                    var minor = DateTime.Now.Month;
-                    var build = calcSetupBuild();
-                    //revision = DateTime.Now.Hour;
-                    _newVersion = new Version(major, minor, build, 0);
-                    break;
-            }
-        }
-        static int calcSetupBuild()
-        {
-            int major = DateTime.Now.Year % 100;
-            int minor = DateTime.Now.Month;
-            int oldDay = oldVersion.Build / 100;
-            int oldRev = oldVersion.Build % 100;
-            int newDay = DateTime.Now.Day;
-
-            int newBuild = (oldVersion.Major == major && oldVersion.Minor == minor && oldDay == newDay) 
-                ? oldVersion.Build + 1 : newDay * 100 + 1;
-            return newBuild;
-        }
+            VersionType.Assembly => GetCurrentBuildVersion.CalcVersion_BuildTime(_oldVersion),
+            VersionType.Setup => GetCurrentBuildVersion.CalcSetupVerions(_oldVersion)
+        };
 
         static string replaceGuid()
         {
@@ -135,10 +142,10 @@ namespace UpdateVersion
             string strReg2 = strReg.Replace("{0}", "PackageCode");
 
             Regex regex = new Regex(strReg.Replace("{0}", "ProductCode"));
-            productGuid = Guid.NewGuid().ToString().ToUpper();
+            _productGuid = Guid.NewGuid().ToString().ToUpper();
             string replace = strReplace.Replace("{0}", "ProductCode");
-            replace = replace.Replace("{1}", productGuid);
-            string outputString = regex.Replace(inputString, replace, 1);
+            replace = replace.Replace("{1}", _productGuid);
+            string outputString = regex.Replace(_inputString, replace, 1);
 
             regex = new Regex(strReg.Replace("{0}", "PackageCode"));
             replace = strReplace.Replace("{0}", "PackageCode");
@@ -148,25 +155,23 @@ namespace UpdateVersion
             return outputString;
         }
 
-        static void writeNewVersion()
+        internal static void writeNewVersion()
         {
-            string replace = "";
-            string strInput = "";
-
-            switch (whichVersion)
+            string outputString = "";
+            var nv = _newVersion;
+            switch (_whichVersion)
             {
                 case VersionType.Assembly:
-                    replace = string.Format(strReplace[(int)whichVersion], _newVersion.ToString());
-                    strInput = inputString;
+                    var newVer = nv.ToString();
+                    outputString = regEx[0].Replace(_inputString, string.Format(_strReplace[0], newVer), 1);
+                    outputString = regEx[1].Replace(outputString, string.Format(_strReplace[1], newVer), 1);
                     break;
 
                 case VersionType.Setup:
-                    replace = string.Format(strReplace[(int)whichVersion], string.Format("{0}.{1}.{2:0000}", _newVersion.Major, _newVersion.Minor, _newVersion.Build));
-                    strInput = replaceGuid();
+                    newVer = $"{nv.Major}.{nv.Minor}.{nv.Build}";
+                    outputString = regEx[2].Replace(replaceGuid(), string.Format(_strReplace[2], newVer), 1);
                     break;
             }
-
-            string outputString = regEx[(int)whichVersion].Replace(strInput, replace, 1);
             File.WriteAllText(_filePath, outputString, Encoding.UTF8);
         }
 

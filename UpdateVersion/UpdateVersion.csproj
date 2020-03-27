@@ -1,6 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <UsingTask TaskName="GetCurrentBuildVersion" AssemblyFile="..\BuildVersion.dll" />
+  <UsingTask TaskName="GetCurrentBuildVersion" AssemblyFile="..\Universe.BuildVersion.dll" />
   <Target Name="BeforeBuildActionsProject1" BeforeTargets="BeforeBuild">
     <GetCurrentBuildVersion BaseVersion="$(FileVersion)">
       <Output TaskParameter="Version" PropertyName="FileVersion" />
@@ -16,14 +16,29 @@
     <Nullable>enable</Nullable>
     <LangVersion>8.0</LangVersion>
     <WarningsAsErrors>CS8600;CS8602;CS8603;CS8625;CS8604</WarningsAsErrors>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <RootNamespace>Universe.BuildVersion</RootNamespace>
+    <AssemblyName>UpdateVersion</AssemblyName>
+    <ApplicationIcon />
+    <StartupObject />
   </PropertyGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\BuildVersion\BuildVersion.csproj" />
+    <PackageReference Include="Costura.Fody" Version="4.1.0" />
+    <PackageReference Include="Fody" Version="6.1.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\BuildVersion\BuildVersion.csproj">
+      <Private>true</Private>
+    </ProjectReference>
   </ItemGroup>
   
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="rem xcopy /y $(TargetPath) $(ProjectDir)..\..\Publish\" />
+    <Exec Command="xcopy /y $(TargetPath) $(ProjectDir)..\..\Publish\" />
   </Target>
 
 </Project>
