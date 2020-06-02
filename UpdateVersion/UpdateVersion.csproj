@@ -38,7 +38,7 @@
   </ItemGroup>
   
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy /y $(TargetPath) $(ProjectDir)..\..\Publish\" />
+    <Exec Command="xcopy /y $(TargetPath) $(ProjectDir)..\Publish\" />
   </Target>
 
 </Project>

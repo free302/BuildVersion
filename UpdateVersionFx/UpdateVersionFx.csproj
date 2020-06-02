@@ -102,7 +102,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy /y $(TargetPath) $(ProjectDir)..\..\Publish\</PostBuildEvent>
+    <PostBuildEvent>xcopy /y $(TargetPath) $(ProjectDir)..\Publish\</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>$(SolutionDir)UpdateVersionFx.exe A $(ProjectDir)Properties\AssemblyInfo.cs</PreBuildEvent>
