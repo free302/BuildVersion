@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Version>2.0</Version>
+		<Version>2.1</Version>
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<!--<TargetFramework>net6</TargetFramework>-->
 		<RootNamespace>Universe.Version</RootNamespace>
@@ -25,9 +25,9 @@
 
 	<PropertyGroup>
 		<Company>UniverseSoft</Company>
-		<Product>Universe.BuildVersion</Product>
+		<Product>Universe.Version</Product>
 		<Authors>UniverseSoft</Authors>
-		<Description>BuildVersion library</Description>
+		<Description>Version library</Description>
 		<Copyright>Copyright (c) 2021 UniverseSoft</Copyright>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	</PropertyGroup>
@@ -35,17 +35,8 @@
 	<ItemGroup>
 		<PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.18.2" />
 		<PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.2.0" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Reference Include="NodaTime">
-	    <HintPath>..\lib\NodaTime.dll</HintPath>
-	    <Private>True</Private>
-	  </Reference>
-	  <Reference Include="NodaTime.Testing">
-	    <HintPath>..\lib\NodaTime.Testing.dll</HintPath>
-	    <Private>True</Private>
-	  </Reference>
+		<PackageReference Include="NodaTime" Version="3.1.0" />
+		<PackageReference Include="NodaTime.Testing" Version="3.1.0" />
 	</ItemGroup>
 
 	<!--<Target Name="PostBuild" AfterTargets="PostBuildEvent">
@@ -57,7 +48,7 @@
 		<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)Publish\">
 			<Output TaskParameter="CopiedFiles" ItemName="Copied" />
 		</Copy>
-		<Message Text="$(TargetFileName) -&gt; @(Copied)" Importance="high" />
+		<Message Text="xcopy: @(Copied)" Importance="high" />
 	</Target>
 
 </Project>

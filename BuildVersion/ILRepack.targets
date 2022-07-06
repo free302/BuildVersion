@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<Target Name="ILRepacker" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+		<ItemGroup>
+			<InputAssemblies Include="$(OutputPath)\*.dll" />
+			<InputAssemblies Include="C:\Users\sybae\.nuget\packages\nodatime\3.1.0\lib\netstandard2.0\NodaTime.dll" />
+			<InputAssemblies Include="C:\Users\sybae\.nuget\packages\nodatime.testing\3.1.0\lib\netstandard2.0\NodaTime.Testing.dll" />
+		</ItemGroup>
+
+		<ItemGroup>
+			<!-- Must be a fully qualified name -->
+			<!--<DoNotInternalizeAssemblies Include="ExampleAssemblyToMerge3" />-->
+		</ItemGroup>
+
+		<ILRepack
+			Parallel="true"
+			Internalize="true"
+			InternalizeExclude="@(DoNotInternalizeAssemblies)"
+			InputAssemblies="@(InputAssemblies)"
+			TargetKind="Dll"
+			OutputFile="$(OutputPath)\$(AssemblyName).dll" />
+	</Target>
+</Project>

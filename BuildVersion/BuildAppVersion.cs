@@ -6,19 +6,29 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
-namespace Jdt.Version
+namespace Universe.Version
 {
     using V = System.Version;
 
     public class BuildAppVersion : Task
     {
         #region ---- OUTPUT : ----
-        /// <summary>
-        /// 각 output은 MSBuild 각 속성
-        /// </summary>
 
+        /// <summary>
+        /// MSBuild $(VersionPrefix)
+        /// </summary>
         [Output] public string VersionPrefix { get; set; } = "1.0.0.0";
+
+        /// <summary>
+        /// MSBuild $(PackageVersion)
+        /// nuget 패키지 만들때 사용되는 버전 : $(VersionPrefix)-$(VersionSuffix)
+        /// </summary>
         [Output] public string PackageVersion { get; set; } = "1.0.0.0";
+
+        /// <summary>
+        /// MSBuild $(Version)
+        /// $(VersionPrefix)-$(VersionSuffix)-$(SourceRevisionId)
+        /// </summary>
         [Output] public string Version { get; set; } = "1.0.0.0";
 
         #endregion
@@ -26,10 +36,21 @@ namespace Jdt.Version
 
         #region ---- INPUT Parameters ----
 
+        /// <summary>
+        /// 현재 버전 : IsTimeFormat == false 경우 사용
+        /// </summary>
         public string BaseVersionPrefix { get; set; } = "1.0.0.0";
+
+        /// <summary>
+        /// 버전 뒤에 붙일 BETA/RC 등
+        /// </summary>
         public string VersionSuffix { get; set; } = "";
+
+        /// <summary>
+        /// 버전 뒤에 붙일 GIT 커밋번호 등 소스관리 정보
+        /// </summary>
         public string SourceRevisionId { get; set; } = "";
-        
+
         /// <summary>
         /// 버전 형식 지정
         ///  - true  : yy.MM.dd.HHmmss 형식
@@ -42,7 +63,9 @@ namespace Jdt.Version
 
         #endregion
 
-
+        /// <summary>
+        /// 테스트를 위한 클럭
+        /// </summary>
         public IClock? Clock { get; set; }
 
         public override bool Execute()

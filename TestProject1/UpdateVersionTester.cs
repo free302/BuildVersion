@@ -7,14 +7,14 @@ namespace Tester
             var now = DateTime.UtcNow;
             NodaTime.IClock clock = new NodaTime.Testing.FakeClock(NodaTime.Instant.FromDateTimeUtc(now));
             
-            instance = new Jdt.Version.BuildAppVersion();
+            instance = new Universe.Version.BuildAppVersion();
             instance.Clock = clock;
             instance.BaseVersionPrefix = "1.2.3";
             instance.VersionSuffix = "beta3";
             instance.SourceRevisionId = "aabbcc";
             //instance.IsTimeFormat = true;
         }
-        readonly Jdt.Version.BuildAppVersion instance;
+        readonly Universe.Version.BuildAppVersion instance;
 
         [Fact]
         void timeFormat()
