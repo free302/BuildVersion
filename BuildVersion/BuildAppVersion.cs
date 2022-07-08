@@ -1,10 +1,10 @@
 ﻿using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using NodaTime;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using NodaTime;
 
 namespace Universe.Version
 {

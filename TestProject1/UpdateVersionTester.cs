@@ -22,10 +22,10 @@ namespace Tester
             instance.IsTimeFormat = true;
             instance.Execute();
 
-            var exp = DateTime.UtcNow.ToString("yy.MM.dd.HHmm");
+            var exp = DateTime.UtcNow.ToString("yyyy.MM.dd.HHmm");
             Assert.Equal(exp, instance.VersionPrefix);
             Assert.Equal($"{exp}-beta3", instance.PackageVersion);
-            Assert.Equal($"{exp}-beta3+aabbcc", instance.Version);
+            Assert.Equal($"{exp}-beta3", instance.Version);
         }
 
 
@@ -38,7 +38,7 @@ namespace Tester
             var exp = "1.2";
             Assert.StartsWith(exp, instance.VersionPrefix);
             Assert.Contains("-beta3", instance.PackageVersion);
-            Assert.Contains("-beta3+aabbcc", instance.Version);
+            Assert.Contains("-beta3", instance.Version);
         }
     }
 
