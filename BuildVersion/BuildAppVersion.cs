@@ -71,8 +71,9 @@ namespace Universe.Version
         public override bool Execute()
         {
             VersionPrefix = (IsTimeFormat ? calcPrefix_TimeFormat(Clock) : calcPrefix(BaseVersionPrefix, Clock)).ToString();
-            PackageVersion = VersionSuffix == "" ? VersionPrefix : $"{VersionPrefix}-{VersionSuffix}";
-            Version = SourceRevisionId == "" ? PackageVersion : $"{PackageVersion}+{SourceRevisionId}";
+            //Version = SourceRevisionId == "" ? PackageVersion : $"{PackageVersion}+{SourceRevisionId}";
+            Version = VersionSuffix == "" ? VersionPrefix : $"{VersionPrefix}-{VersionSuffix}";
+            PackageVersion = Version;
 
             Debug.WriteLine($"[{nameof(BuildAppVersion)}] Prefix={BaseVersionPrefix}, Suffix={VersionSuffix}, RevisionId={SourceRevisionId}");
             Debug.WriteLine($"[{nameof(BuildAppVersion)}] new VersionPrefix={VersionPrefix}, PackageVersion={PackageVersion}, Version={Version}");
