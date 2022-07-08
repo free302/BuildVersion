@@ -105,7 +105,7 @@ namespace Universe.Version
         {
             var now = clock?.GetCurrentInstant().ToDateTimeUtc() ?? DateTime.UtcNow;
             //return new V(now.Year % 100, now.Month, now.Day, now.Hour * 100 + now.Minute).ToString();
-            return now.ToString("yy.MM.dd.HHmm");
+            return now.ToString("yyyy.MM.dd.HHmm");
         }
 
         public override string ToString() => PackageVersion;
