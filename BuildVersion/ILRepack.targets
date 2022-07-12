@@ -3,8 +3,8 @@
 	<Target Name="ILRepacker" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
 		<ItemGroup>
 			<InputAssemblies Include="$(OutputPath)\*.dll" />
-			<InputAssemblies Include="C:\Users\sybae\.nuget\packages\nodatime\3.1.0\lib\netstandard2.0\NodaTime.dll" />
-			<InputAssemblies Include="C:\Users\sybae\.nuget\packages\nodatime.testing\3.1.0\lib\netstandard2.0\NodaTime.Testing.dll" />
+			<InputAssemblies Include="$(ProjectDir)..\lib\NodaTime.dll" />
+			<InputAssemblies Include="$(ProjectDir)..\lib\NodaTime.Testing.dll" />
 		</ItemGroup>
 
 		<ItemGroup>
