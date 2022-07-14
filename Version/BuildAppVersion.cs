@@ -12,6 +12,12 @@ using V = System.Version;
 
 public class BuildAppVersion : Task
 {
+    public BuildAppVersion()
+    {
+
+    }
+
+
     #region ---- OUTPUT : ----
 
     /// <summary>

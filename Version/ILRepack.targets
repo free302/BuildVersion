@@ -1,10 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	
 	<Target Name="ILRepacker" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
 		<ItemGroup>
 			<InputAssemblies Include="$(OutputPath)\*.dll" />
 			<InputAssemblies Include="$(ProjectDir)..\lib\NodaTime.dll" />
 			<InputAssemblies Include="$(ProjectDir)..\lib\NodaTime.Testing.dll" />
+			<!--<InputAssemblies Include="$(ProjectDir)..\lib\Microsoft.Build.Utilities.Core.dll" />
+			<InputAssemblies Include="$(ProjectDir)..\lib\System.Configuration.ConfigurationManager.dll" />
+			<InputAssemblies Include="$(ProjectDir)..\lib\System.Runtime.CompilerServices.Unsafe.dll" />-->
 		</ItemGroup>
 
 		<ItemGroup>
@@ -19,5 +23,7 @@
 			InputAssemblies="@(InputAssemblies)"
 			TargetKind="Dll"
 			OutputFile="$(OutputPath)\$(AssemblyName).dll" />
+		
 	</Target>
+	
 </Project>

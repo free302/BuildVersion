@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Version>1.0</Version>    
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net4.8</TargetFramework>
+    <RootNamespace>Universe.MyConsoleApp1</RootNamespace>
+    <AssemblyName>Universe.MyConsoleApp1</AssemblyName>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <LangVersion>10.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <WarningsAsErrors>CS8600;CS8602;CS8603;CS8625;CS8604</WarningsAsErrors>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Company>UniverseSoft</Company>
+    <Product>Universe.MyConsoleApp1</Product>
+    <Authors>UniverseSoft</Authors>
+    <Description>MyConsoleApp1 app</Description>
+    <Copyright>Copyright (c) 2021 UniverseSoft</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
+  
+
+</Project>

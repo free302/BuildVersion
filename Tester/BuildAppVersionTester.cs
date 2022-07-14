@@ -1,8 +1,8 @@
 namespace Tester
 {
-    public class UpdateVersionTester
+    public class BuildAppVersionTester
     {
-        public UpdateVersionTester()
+        public BuildAppVersionTester()
         {
             var now = DateTime.UtcNow;
             NodaTime.IClock clock = new NodaTime.Testing.FakeClock(NodaTime.Instant.FromDateTimeUtc(now));
