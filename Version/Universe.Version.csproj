@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Version>2.6</Version>
-		<TargetFramework>net4.8</TargetFramework>
+		<Version>2.7</Version>
+		<TargetFramework>netstandard2.0</TargetFramework>
 		<PlatformTarget>AnyCPU</PlatformTarget>
 		<OutputPath>bin\$(Configuration)\$(PlatformTarget)\</OutputPath>
 
@@ -39,18 +39,16 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.2.0" />
-		<PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.18.2" />
-		<PackageReference Include="NodaTime" Version="3.1.0" />
-		<!--<PackageReference Include="System.Reflection.MetadataLoadContext" Version="6.0.0" />-->
+	  <None Remove="ILRepack.targets" />
 	</ItemGroup>
 
-	<!--<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy /y $(TargetPath) $(ProjectDir)..\Publish\" />
-  </Target>-->
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.2.0" />
+		<PackageReference Include="NodaTime" Version="3.1.0" Condition="$(Configuration) == 'Debug'" />
+	</ItemGroup>
 
-	<!--<Target Name="CopyTargetToPublish" AfterTargets="PostBuildEvent">-->
-	<Target Name="CopyTargetToPublish" AfterTargets="ILRepack">
+	<Target Name="CopyTargetToPublish" AfterTargets="PostBuildEvent">
+	<!--<Target Name="CopyTargetToPublish" AfterTargets="ILRepack">-->
 		
 		<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)Publish\">
 			<Output TaskParameter="CopiedFiles" ItemName="Copied" />

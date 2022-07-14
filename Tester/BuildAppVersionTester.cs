@@ -5,10 +5,15 @@ namespace Tester
         public BuildAppVersionTester()
         {
             var now = DateTime.UtcNow;
+
             NodaTime.IClock clock = new NodaTime.Testing.FakeClock(NodaTime.Instant.FromDateTimeUtc(now));
             
             instance = new Universe.Version.BuildAppVersion();
+
+#if DEBUG
             instance.Clock = clock;
+#endif
+
             instance.BaseVersionPrefix = "1.2.3";
             instance.VersionSuffix = "beta3";
             instance.SourceRevisionId = "aabbcc";

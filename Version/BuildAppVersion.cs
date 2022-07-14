@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
-using NodaTime;
 
 namespace Universe.Version;
 
@@ -12,6 +11,8 @@ using V = System.Version;
 
 public class BuildAppVersion : Task
 {
+    static string _typeName = typeof(BuildAppVersion).FullName;
+
     public BuildAppVersion()
     {
 
@@ -69,20 +70,24 @@ public class BuildAppVersion : Task
 
     #endregion
 
+
+#if DEBUG
     /// <summary>
     /// 테스트를 위한 클럭
-    /// </summary>
-    public IClock? Clock { get; set; }
+    /// </summary>    
+    public NodaTime.IClock? Clock { get; set; }
+#endif
 
     public override bool Execute()
     {
-        VersionPrefix = (IsTimeFormat ? calcPrefix_TimeFormat(Clock) : calcPrefix(BaseVersionPrefix, Clock)).ToString();
-        //Version = SourceRevisionId == "" ? PackageVersion : $"{PackageVersion}+{SourceRevisionId}";
+        var now = utcNow();
+        VersionPrefix = IsTimeFormat ? calcPrefix_TimeFormat(now) : calcPrefix(BaseVersionPrefix, now);
+
         Version = VersionSuffix == "" ? VersionPrefix : $"{VersionPrefix}-{VersionSuffix}";
         PackageVersion = Version;
 
-        Debug.WriteLine($"[{nameof(BuildAppVersion)}] Prefix={BaseVersionPrefix}, Suffix={VersionSuffix}, RevisionId={SourceRevisionId}");
-        Debug.WriteLine($"[{nameof(BuildAppVersion)}] new VersionPrefix={VersionPrefix}, PackageVersion={PackageVersion}, Version={Version}");
+        log($"[{_typeName}] BaseVersionPrefix={BaseVersionPrefix}, VersionSuffix={VersionSuffix}, SourceRevisionId={SourceRevisionId}");
+        log($"[{_typeName}] VersionPrefix={VersionPrefix}, Version={Version}, PackageVersion={PackageVersion}");
         return true;
     }
 
@@ -91,12 +96,11 @@ public class BuildAppVersion : Task
     /// </summary>
     /// <param name="baseVersinString"></param>
     /// <returns></returns>
-    static string calcPrefix(string baseVersinString, IClock? clock)
+    static string calcPrefix(string baseVersinString, DateTime now)
     {
         var baseVersion = V.Parse(baseVersinString);
 
         var _baseDay = new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        var now = clock?.GetCurrentInstant().ToDateTimeUtc() ?? DateTime.UtcNow;
 
         var build = (now - _baseDay).Days;
         var revision = (int)now.TimeOfDay.TotalSeconds / 2;
@@ -107,12 +111,23 @@ public class BuildAppVersion : Task
     /// 현재 날짜 시각 형식
     /// </summary>
     /// <returns></returns>
-    static string calcPrefix_TimeFormat(IClock? clock)
+    static string calcPrefix_TimeFormat(DateTime now)
     {
-        var now = clock?.GetCurrentInstant().ToDateTimeUtc() ?? DateTime.UtcNow;
         //return new V(now.Year % 100, now.Month, now.Day, now.Hour * 100 + now.Minute).ToString();
         return now.ToString("yyyy.MM.dd.HHmm");
     }
+
+    DateTime utcNow()
+    {
+#if DEBUG
+        return Clock?.GetCurrentInstant().ToDateTimeUtc() ?? DateTime.UtcNow;
+#else
+        return DateTime.UtcNow;
+#endif
+    }
+
+    [Conditional("DEBUG")]
+    void log(string msg) => Debug.WriteLine(msg);
 
     public override string ToString() => PackageVersion;
 }
