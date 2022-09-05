@@ -68,6 +68,8 @@ public class BuildAppVersion : Task
     /// </summary>
     public bool IsTimeFormat { get; set; } = true;
 
+    public bool UsingUTC { get; set; } = false;
+
     #endregion
 
 
@@ -80,7 +82,7 @@ public class BuildAppVersion : Task
 
     public override bool Execute()
     {
-        var now = utcNow();
+        var now = this.now();
         VersionPrefix = IsTimeFormat ? calcPrefix_TimeFormat(now) : calcPrefix(BaseVersionPrefix, now);
 
         Version = VersionSuffix == "" ? VersionPrefix : $"{VersionPrefix}-{VersionSuffix}";
@@ -117,12 +119,15 @@ public class BuildAppVersion : Task
         return now.ToString("yyyy.MM.dd.HHmm");
     }
 
-    DateTime utcNow()
+    DateTime now()
     {
 #if DEBUG
-        return Clock?.GetCurrentInstant().ToDateTimeUtc() ?? DateTime.UtcNow;
+
+        var utc = Clock?.GetCurrentInstant().ToDateTimeUtc() ?? DateTime.UtcNow;
+        var local = Clock?.GetCurrentInstant().ToDateTimeUtc().ToLocalTime() ?? DateTime.Now;
+        return UsingUTC ? utc : local;
 #else
-        return DateTime.UtcNow;
+        return UsingUTC? DateTime.UtcNow : DateTIme.Now;
 #endif
     }
 
