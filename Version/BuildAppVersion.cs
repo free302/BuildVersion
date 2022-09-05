@@ -127,7 +127,7 @@ public class BuildAppVersion : Task
         var local = Clock?.GetCurrentInstant().ToDateTimeUtc().ToLocalTime() ?? DateTime.Now;
         return UsingUTC ? utc : local;
 #else
-        return UsingUTC? DateTime.UtcNow : DateTIme.Now;
+        return UsingUTC? DateTime.UtcNow : DateTime.Now;
 #endif
     }
 
