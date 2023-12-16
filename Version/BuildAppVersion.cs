@@ -9,14 +9,11 @@ namespace Universe.Version;
 
 using V = System.Version;
 
-public class BuildAppVersion : Task
+public class BuildAppVersion : Microsoft.Build.Utilities.Task
 {
     static string _typeName = typeof(BuildAppVersion).FullName;
 
-    public BuildAppVersion()
-    {
-
-    }
+    public BuildAppVersion() { }
 
 
     #region ---- OUTPUT : ----
@@ -24,19 +21,19 @@ public class BuildAppVersion : Task
     /// <summary>
     /// MSBuild $(VersionPrefix)
     /// </summary>
-    [Output] public string VersionPrefix { get; set; } = "1.0.0.0";
+    [Output] public string VersionPrefix { get; set; } = "1.0";
 
     /// <summary>
     /// MSBuild $(PackageVersion)
     /// nuget 패키지 만들때 사용되는 버전 : $(VersionPrefix)-$(VersionSuffix)
     /// </summary>
-    [Output] public string PackageVersion { get; set; } = "1.0.0.0";
+    [Output] public string PackageVersion { get; set; } = "1.0";
 
     /// <summary>
     /// MSBuild $(Version)
     /// $(VersionPrefix)-$(VersionSuffix)-$(SourceRevisionId)
     /// </summary>
-    [Output] public string Version { get; set; } = "1.0.0.0";
+    [Output] public string Version { get; set; } = "1.0";
 
     #endregion
 
@@ -46,7 +43,7 @@ public class BuildAppVersion : Task
     /// <summary>
     /// 현재 버전 : IsTimeFormat == false 경우 사용
     /// </summary>
-    public string BaseVersionPrefix { get; set; } = "1.0.0.0";
+    public string BaseVersionPrefix { get; set; } = "";
 
     /// <summary>
     /// 버전 뒤에 붙일 BETA/RC 등
@@ -66,7 +63,15 @@ public class BuildAppVersion : Task
     ///    - n(days) : 2000.01.01 이후 오늘까지의 날수
     ///    - n(seconds) : 오늘 00:00:00 이후 현재 까지의 초수/2
     /// </summary>
+    [Obsolete]
     public bool IsTimeFormat { get; set; } = true;
+
+    /// <summary>
+    /// 0 : major.minor.n(days).n(seconds)
+    /// 1 : yyyy.MM.dd.HHmm
+    /// 2 : major.minor-yy.MM.dd.HHmmss
+    /// </summary>
+    public int FormatId { get; set; } = 0;
 
     public bool UsingUTC { get; set; } = false;
 
@@ -82,14 +87,32 @@ public class BuildAppVersion : Task
 
     public override bool Execute()
     {
+        if (string.IsNullOrWhiteSpace(BaseVersionPrefix)) BaseVersionPrefix = "1.0";
+
         var now = this.now();
-        VersionPrefix = IsTimeFormat ? calcPrefix_TimeFormat(now) : calcPrefix(BaseVersionPrefix, now);
+        VersionPrefix = FormatId switch
+        {
+            1 => prefix_DateTime(now),
+            2 => BaseVersionPrefix,
+            _ => prefix_MajorMinorDaysSeconds(BaseVersionPrefix, now)
+        };
 
-        Version = VersionSuffix == "" ? VersionPrefix : $"{VersionPrefix}-{VersionSuffix}";
-        PackageVersion = Version;
+        var suffix = FormatId switch
+        {
+            2 => $"-{suffix_DateTime(now)}",
+            _ => string.IsNullOrWhiteSpace(VersionSuffix) ? "" : $"-{VersionSuffix}"
+        };
+        PackageVersion = $"{VersionPrefix}{suffix}";
 
-        log($"[{_typeName}] BaseVersionPrefix={BaseVersionPrefix}, VersionSuffix={VersionSuffix}, SourceRevisionId={SourceRevisionId}");
-        log($"[{_typeName}] VersionPrefix={VersionPrefix}, Version={Version}, PackageVersion={PackageVersion}");
+        var src = string.IsNullOrWhiteSpace(SourceRevisionId) ? "" : $"+{SourceRevisionId}";
+        Version = $"{PackageVersion}{src}";
+
+        log($"[in] BaseVersionPrefix={BaseVersionPrefix}");
+        log($"[in] VersionSuffix={VersionSuffix}");
+        log($"[in] SourceRevisionId={SourceRevisionId}");
+        log($"[out] VersionPrefix={VersionPrefix}");
+        log($"[out] PackageVersion={PackageVersion}");
+        log($"[out] Version={Version}");
         return true;
     }
 
@@ -98,7 +121,7 @@ public class BuildAppVersion : Task
     /// </summary>
     /// <param name="baseVersinString"></param>
     /// <returns></returns>
-    static string calcPrefix(string baseVersinString, DateTime now)
+    static string prefix_MajorMinorDaysSeconds(string baseVersinString, DateTime now)
     {
         var baseVersion = V.Parse(baseVersinString);
 
@@ -113,10 +136,20 @@ public class BuildAppVersion : Task
     /// 현재 날짜 시각 형식
     /// </summary>
     /// <returns></returns>
-    static string calcPrefix_TimeFormat(DateTime now)
+    static string prefix_DateTime(DateTime now)
     {
         //return new V(now.Year % 100, now.Month, now.Day, now.Hour * 100 + now.Minute).ToString();
         return now.ToString("yyyy.MM.dd.HHmm");
+    }
+
+    /// <summary>
+    /// 현재 날짜 시각 형식
+    /// </summary>
+    /// <returns></returns>
+    static string suffix_DateTime(DateTime now)
+    {
+        //return new V(now.Year % 100, now.Month, now.Day, now.Hour * 100 + now.Minute).ToString();
+        return now.ToString("yyyy.MM.dd.HHmmss");
     }
 
     DateTime now()
@@ -127,12 +160,12 @@ public class BuildAppVersion : Task
         var local = Clock?.GetCurrentInstant().ToDateTimeUtc().ToLocalTime() ?? DateTime.Now;
         return UsingUTC ? utc : local;
 #else
-        return UsingUTC? DateTime.UtcNow : DateTime.Now;
+        return UsingUTC ? DateTime.UtcNow : DateTime.Now;
 #endif
     }
 
     [Conditional("DEBUG")]
     void log(string msg) => Debug.WriteLine(msg);
 
-    public override string ToString() => PackageVersion;
+    public override string ToString() => Version;
 }

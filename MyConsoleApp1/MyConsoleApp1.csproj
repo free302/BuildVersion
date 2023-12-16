@@ -1,28 +1,32 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <Version>1.0</Version>    
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net4.8</TargetFramework>
-    <RootNamespace>Universe.MyConsoleApp1</RootNamespace>
-    <AssemblyName>Universe.MyConsoleApp1</AssemblyName>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net4.8</TargetFramework>
+		
+		<RootNamespace>Universe.MyConsoleApp1</RootNamespace>
+		<AssemblyName>$(RootNamespace)</AssemblyName>
+		
+		<VersionPrefix>1.23</VersionPrefix>
+		<VersionSuffix>zzz</VersionSuffix>
+		<SourceRevisionId>aabbccdd</SourceRevisionId>
+		
+	</PropertyGroup>
 
-  <PropertyGroup>
-    <LangVersion>10.0</LangVersion>
-    <Nullable>enable</Nullable>
-    <WarningsAsErrors>CS8600;CS8602;CS8603;CS8625;CS8604</WarningsAsErrors>
-  </PropertyGroup>
 
-  <PropertyGroup>
-    <Company>UniverseSoft</Company>
-    <Product>Universe.MyConsoleApp1</Product>
-    <Authors>UniverseSoft</Authors>
-    <Description>MyConsoleApp1 app</Description>
-    <Copyright>Copyright (c) 2021 UniverseSoft</Copyright>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-  </PropertyGroup>
+	<!-- 버전설정 자동화 : 어셈블리와 누겟 패키지의 버전을 설정 -->
+	<UsingTask TaskName="BuildAppVersion" AssemblyFile="..\publish\Universe.Version.dll" />
+	<Target Name="AppVersion" BeforeTargets="BeforeBuild">
+		<!-- IsTimeFormat = true ==> 날짜시간형식 = yyyy.MM.dd.HHmm -->
+		<BuildAppVersion FormatId="0" BaseVersionPrefix="$(VersionPrefix)" VersionSuffix="$(VersionSuffix)" SourceRevisionId="$(SourceRevisionId)">
+			<Output TaskParameter="Version" PropertyName="Version" />
+			<Output TaskParameter="VersionPrefix" PropertyName="VersionPrefix" />
+			<Output TaskParameter="VersionPrefix" PropertyName="FileVersion" />
+			<Output TaskParameter="VersionPrefix" PropertyName="AssemblyVersion" />
+			<Output TaskParameter="PackageVersion" PropertyName="PackageVersion" />
+		</BuildAppVersion>
+	</Target>
 
-  
+
 
 </Project>
