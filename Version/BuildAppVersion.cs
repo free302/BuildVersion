@@ -1,9 +1,7 @@
 ﻿using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
+using System.Linq;
 
 namespace Universe.Version;
 
@@ -11,8 +9,6 @@ using V = System.Version;
 
 public class BuildAppVersion : Microsoft.Build.Utilities.Task
 {
-    static string _typeName = typeof(BuildAppVersion).FullName;
-
     public BuildAppVersion() { }
 
 
@@ -70,6 +66,7 @@ public class BuildAppVersion : Microsoft.Build.Utilities.Task
     /// 0 : major.minor.n(days).n(seconds)
     /// 1 : yyyy.MM.dd.HHmm
     /// 2 : major.minor-yy.MM.dd.HHmmss
+    /// 3 : major.minor-yyMMddHHmmss
     /// </summary>
     public int FormatId { get; set; } = 0;
 
@@ -94,18 +91,26 @@ public class BuildAppVersion : Microsoft.Build.Utilities.Task
         {
             1 => prefix_DateTime(now),
             2 => BaseVersionPrefix,
+            3 => BaseVersionPrefix,
             _ => prefix_MajorMinorDaysSeconds(BaseVersionPrefix, now)
         };
 
         var suffix = FormatId switch
         {
             2 => $"-{suffix_DateTime(now)}",
+            3 => $"-{suffix_DateTime_Package(now)}",
             _ => string.IsNullOrWhiteSpace(VersionSuffix) ? "" : $"-{VersionSuffix}"
         };
-        PackageVersion = $"{VersionPrefix}{suffix}";
+        Version = $"{PackageVersion}{suffix}";
 
-        var src = string.IsNullOrWhiteSpace(SourceRevisionId) ? "" : $"+{SourceRevisionId}";
-        Version = $"{PackageVersion}{src}";
+        //PackageVersion
+        // a) patch == Version.build
+        PackageVersion = VersionPrefix.ToString();
+        if (!V.TryParse(VersionPrefix, out var v)) v = new V();
+        PackageVersion = $"{v.Major}.{v.Minor}.{v.Build}{suffix}";
+
+        //이건 ProductVersion
+        //var src = string.IsNullOrWhiteSpace(SourceRevisionId) ? "" : $"+{SourceRevisionId}";
 
         log($"[in] BaseVersionPrefix={BaseVersionPrefix}");
         log($"[in] VersionSuffix={VersionSuffix}");
@@ -150,6 +155,11 @@ public class BuildAppVersion : Microsoft.Build.Utilities.Task
     {
         //return new V(now.Year % 100, now.Month, now.Day, now.Hour * 100 + now.Minute).ToString();
         return now.ToString("yyyy.MM.dd.HHmmss");
+    }
+    static string suffix_DateTime_Package(DateTime now)
+    {
+        //return new V(now.Year % 100, now.Month, now.Day, now.Hour * 100 + now.Minute).ToString();
+        return now.ToString("yyyy-MM-dd-HHmmss");
     }
 
     DateTime now()
