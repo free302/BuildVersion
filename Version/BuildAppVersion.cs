@@ -146,7 +146,7 @@ public class BuildAppVersion : Microsoft.Build.Utilities.Task
     static string prefix_DateTime(DateTime now)
     {
         //return new V(now.Year % 100, now.Month, now.Day, now.Hour * 100 + now.Minute).ToString();
-        return now.ToString("yyyy.MM.dd.HHmm");
+        return $"{now:yyyy.MM.dd.HHmm}";
     }
 
     /// <summary>
