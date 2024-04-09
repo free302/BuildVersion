@@ -30,8 +30,8 @@ public class BuildAppVersionTester
 
         var exp = "1.2";
         Assert.StartsWith(exp, instance.VersionPrefix);
+        Assert.Contains($"-beta3", instance.Version);
         Assert.Contains($"-beta3", instance.PackageVersion);
-        Assert.Contains($"-beta3+aabbcc", instance.Version);
     }
 
 
@@ -43,8 +43,8 @@ public class BuildAppVersionTester
 
         var exp = DateTime.Now.ToString("yyyy.MM.dd.HHmm");
         Assert.Equal(exp, instance.VersionPrefix);
+        Assert.Equal($"{exp}-beta3", instance.Version);
         Assert.Equal($"{exp}-beta3", instance.PackageVersion);
-        Assert.Equal($"{exp}-beta3+aabbcc", instance.Version);
     }
 
     [Fact]
@@ -56,10 +56,21 @@ public class BuildAppVersionTester
 
         var exp = "1.2";
         Assert.Equal(exp, instance.VersionPrefix);
-        Assert.Equal($"{exp}-{now}", instance.PackageVersion);
-        Assert.Equal($"{exp}-{now}+aabbcc", instance.Version);
+        Assert.Equal($"{exp}-beta3-{now}", instance.Version);
+        Assert.Equal($"{exp}-beta3-{now}", instance.PackageVersion);
     }
 
+    [Fact]
+    void nugetFormat()
+    {
+        instance.FormatId = 3;
+        instance.Execute();
+        var now = DateTime.Now.ToString("yyyy-MM-dd-HHmmss");
 
+        var exp = "1.2";
+        Assert.Equal(exp, instance.VersionPrefix);
+        Assert.Equal($"{exp}-beta3-{now}", instance.Version);
+        Assert.Equal($"1.2.0-beta3-{now}", instance.PackageVersion);
+    }
 }
 

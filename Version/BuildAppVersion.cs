@@ -1,7 +1,6 @@
 ﻿using Microsoft.Build.Framework;
 using System;
 using System.Diagnostics;
-using System.Linq;
 
 namespace Universe.Version;
 
@@ -89,25 +88,28 @@ public class BuildAppVersion : Microsoft.Build.Utilities.Task
         var now = this.now();
         VersionPrefix = FormatId switch
         {
+            0 => prefix_MajorMinorDaysSeconds(BaseVersionPrefix, now),
             1 => prefix_DateTime(now),
-            2 => BaseVersionPrefix,
-            3 => BaseVersionPrefix,
-            _ => prefix_MajorMinorDaysSeconds(BaseVersionPrefix, now)
+            _ => BaseVersionPrefix,
         };
 
+        var suffixTetxt = string.IsNullOrWhiteSpace(VersionSuffix) ? "" : $"-{VersionSuffix}";
         var suffix = FormatId switch
         {
-            2 => $"-{suffix_DateTime(now)}",
-            3 => $"-{suffix_DateTime_Package(now)}",
-            _ => string.IsNullOrWhiteSpace(VersionSuffix) ? "" : $"-{VersionSuffix}"
+            2 => $"{suffixTetxt}-{suffix_DateTime(now)}",
+            3 => $"{suffixTetxt}-{suffix_DateTime_Package(now)}",
+            _ => suffixTetxt
         };
-        Version = $"{PackageVersion}{suffix}";
+        Version = $"{VersionPrefix}{suffix}";
 
         //PackageVersion
-        // a) patch == Version.build
-        PackageVersion = VersionPrefix.ToString();
-        if (!V.TryParse(VersionPrefix, out var v)) v = new V();
-        PackageVersion = $"{v.Major}.{v.Minor}.{v.Build}{suffix}";
+        var packMiddle = "";
+        if (FormatId == 3)
+        {
+            V.TryParse(VersionPrefix, out var v);
+            if (v.Build == -1) packMiddle = "0";
+        }
+        PackageVersion = $"{VersionPrefix}{packMiddle}{suffix}";
 
         //이건 ProductVersion
         //var src = string.IsNullOrWhiteSpace(SourceRevisionId) ? "" : $"+{SourceRevisionId}";
