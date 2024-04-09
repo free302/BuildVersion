@@ -8,8 +8,8 @@
 		<AssemblyName>$(RootNamespace)</AssemblyName>
 		
 		<VersionPrefix>1.23</VersionPrefix>
-		<VersionSuffix>zzz</VersionSuffix>
-		<SourceRevisionId>aabbccdd</SourceRevisionId>
+		<VersionSuffix>beta</VersionSuffix>
+		<SourceRevisionId></SourceRevisionId>
 		
 	</PropertyGroup>
 
@@ -18,7 +18,7 @@
 	<UsingTask TaskName="BuildAppVersion" AssemblyFile="..\publish\Universe.Version.dll" />
 	<Target Name="AppVersion" BeforeTargets="BeforeBuild">
 		<!-- IsTimeFormat = true ==> 날짜시간형식 = yyyy.MM.dd.HHmm -->
-		<BuildAppVersion FormatId="0" BaseVersionPrefix="$(VersionPrefix)" VersionSuffix="$(VersionSuffix)" SourceRevisionId="$(SourceRevisionId)">
+		<BuildAppVersion FormatId="3" BaseVersionPrefix="$(VersionPrefix)" VersionSuffix="$(VersionSuffix)" SourceRevisionId="$(SourceRevisionId)">
 			<Output TaskParameter="Version" PropertyName="Version" />
 			<Output TaskParameter="VersionPrefix" PropertyName="VersionPrefix" />
 			<Output TaskParameter="VersionPrefix" PropertyName="FileVersion" />

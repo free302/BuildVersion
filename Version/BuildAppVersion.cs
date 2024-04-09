@@ -107,7 +107,7 @@ public class BuildAppVersion : Microsoft.Build.Utilities.Task
         if (FormatId == 3)
         {
             V.TryParse(VersionPrefix, out var v);
-            if (v.Build == -1) packMiddle = "0";
+            if (v.Build == -1) packMiddle = ".0";
         }
         PackageVersion = $"{VersionPrefix}{packMiddle}{suffix}";
 

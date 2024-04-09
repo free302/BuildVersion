@@ -4,7 +4,7 @@
 	<PropertyGroup>
 		<RootNamespace>Universe.Version</RootNamespace>
 		<AssemblyName>$(RootNamespace)</AssemblyName>
-		<VersionPrefix>1.7</VersionPrefix>
+		<VersionPrefix>1.8</VersionPrefix>
 		<VersionSuffix></VersionSuffix>
 		<SourceRevisionId></SourceRevisionId>
 	</PropertyGroup>
